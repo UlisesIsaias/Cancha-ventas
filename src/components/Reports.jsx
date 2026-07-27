@@ -1,7 +1,7 @@
 import { useMemo } from 'react'
 import { formatMoney, formatTime, isToday } from '../utils/format.js'
 
-export default function Reports({ tickets }) {
+export default function Reports({ tickets, onSelectTicket }) {
   const todayTickets = useMemo(
     () =>
       [...tickets]
@@ -64,7 +64,11 @@ export default function Reports({ tickets }) {
       ) : (
         <div>
           {todayTickets.map((t) => (
-            <div className="ticket-row" key={t.id}>
+            <button
+              className="ticket-row ticket-row-clickable"
+              key={t.id}
+              onClick={() => onSelectTicket(t)}
+            >
               <div>
                 <div className="t-name">{t.clientName}</div>
                 <div className="t-time">
@@ -72,7 +76,7 @@ export default function Reports({ tickets }) {
                 </div>
               </div>
               <div className="t-total">{formatMoney(t.total)}</div>
-            </div>
+            </button>
           ))}
         </div>
       )}

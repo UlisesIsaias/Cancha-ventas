@@ -108,7 +108,8 @@ export default function App() {
     // Reinicia la cuenta del cliente
     setClients((prev) => prev.map((c) => (c.id === clientId ? { ...c, order: [] } : c)))
 
-    setTicketToShow(ticket)
+    // Ya no se abre el ticket automáticamente: solo se guarda en el historial.
+    // Se puede consultar después desde Reportes, tocando el nombre del cliente.
     setSelectedClientId(null)
   }
 
@@ -149,7 +150,9 @@ export default function App() {
           />
         )}
 
-        {view === 'reportes' && <Reports tickets={tickets} />}
+        {view === 'reportes' && (
+          <Reports tickets={tickets} onSelectTicket={setTicketToShow} />
+        )}
       </main>
 
       <BottomNav view={view} setView={setView} />
