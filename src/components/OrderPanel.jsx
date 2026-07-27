@@ -11,6 +11,8 @@ export default function OrderPanel({
   onDeleteClient,
 }) {
   const [confirmDelete, setConfirmDelete] = useState(false)
+  const [showPartial, setShowPartial] = useState(false)
+  const [paidInput, setPaidInput] = useState('')
 
   const sortedProducts = useMemo(
     () => [...products].sort((a, b) => b.sales - a.sales),
@@ -18,6 +20,17 @@ export default function OrderPanel({
   )
 
   const total = client.order.reduce((s, i) => s + i.qty * i.price, 0)
+  const parsedPaid = parseFloat(paidInput)
+  const remaining =
+    !isNaN(parsedPaid) && parsedPaid > 0 ? Math.max(total - parsedPaid, 0) : null
+
+  function confirmPartial(e) {
+    e.preventDefault()
+    if (isNaN(parsedPaid) || parsedPaid <= 0) return
+    onCloseAccount(client.id, parsedPaid)
+    setShowPartial(false)
+    setPaidInput('')
+  }
 
   return (
     <div className="overlay" onClick={onClose}>
@@ -85,15 +98,61 @@ export default function OrderPanel({
           </>
         )}
 
-        <div style={{ display: 'flex', gap: 10, marginTop: 22 }}>
-          <button
-            className="btn btn-success btn-block btn-lg"
-            disabled={client.order.length === 0}
-            onClick={() => onCloseAccount(client.id)}
-          >
-            🧾 Cerrar cuenta y dar ticket
-          </button>
-        </div>
+        {showPartial ? (
+          <form onSubmit={confirmPartial} style={{ marginTop: 22 }}>
+            <div className="field">
+              <label>¿Cuánto te dio? (debía {formatMoney(total)})</label>
+              <input
+                autoFocus
+                type="number"
+                min="0"
+                step="0.5"
+                placeholder="Ej. 125"
+                value={paidInput}
+                onChange={(e) => setPaidInput(e.target.value)}
+              />
+            </div>
+            {remaining !== null && (
+              <p style={{ fontSize: 13, color: 'var(--danger)', margin: '0 0 14px' }}>
+                {remaining > 0
+                  ? `Quedaría debiendo ${formatMoney(remaining)}`
+                  : 'Con eso queda pagado completo'}
+              </p>
+            )}
+            <div style={{ display: 'flex', gap: 10 }}>
+              <button
+                type="button"
+                className="btn btn-block"
+                onClick={() => {
+                  setShowPartial(false)
+                  setPaidInput('')
+                }}
+              >
+                Cancelar
+              </button>
+              <button type="submit" className="btn btn-success btn-block">
+                Listo, cerrar cuenta
+              </button>
+            </div>
+          </form>
+        ) : (
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 10, marginTop: 22 }}>
+            <button
+              className="btn btn-success btn-block btn-lg"
+              disabled={client.order.length === 0}
+              onClick={() => onCloseAccount(client.id)}
+            >
+              🧾 Pagó todo · cerrar cuenta
+            </button>
+            <button
+              className="btn btn-block"
+              disabled={client.order.length === 0}
+              onClick={() => setShowPartial(true)}
+            >
+              💸 Pagó solo una parte
+            </button>
+          </div>
+        )}
 
         <div style={{ marginTop: 14, textAlign: 'center' }}>
           {!confirmDelete ? (

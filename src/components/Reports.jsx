@@ -11,6 +11,7 @@ export default function Reports({ tickets, onSelectTicket }) {
   )
 
   const totalHoy = todayTickets.reduce((s, t) => s + t.total, 0)
+  const debenHoy = todayTickets.reduce((s, t) => s + (t.due || 0), 0)
 
   const topProduct = useMemo(() => {
     const counts = {}
@@ -43,6 +44,12 @@ export default function Reports({ tickets, onSelectTicket }) {
           <div className="stat-label">Tickets cerrados</div>
           <div className="stat-value">{todayTickets.length}</div>
         </div>
+        {debenHoy > 0 && (
+          <div className="stat-card accent-danger">
+            <div className="stat-label">Te deben hoy</div>
+            <div className="stat-value">{formatMoney(debenHoy)}</div>
+          </div>
+        )}
         <div className="stat-card">
           <div className="stat-label">Ticket promedio</div>
           <div className="stat-value">{formatMoney(promedio)}</div>
@@ -70,7 +77,10 @@ export default function Reports({ tickets, onSelectTicket }) {
               onClick={() => onSelectTicket(t)}
             >
               <div>
-                <div className="t-name">{t.clientName}</div>
+                <div className="t-name">
+                  {t.clientName}
+                  {t.due > 0 && <span className="pill pill-danger" style={{ marginLeft: 8 }}>Debe {formatMoney(t.due)}</span>}
+                </div>
                 <div className="t-time">
                   {formatTime(t.date)} · {t.items.reduce((s, i) => s + i.qty, 0)} producto(s)
                 </div>

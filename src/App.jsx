@@ -81,17 +81,23 @@ export default function App() {
   }
 
   // ---------- Cerrar cuenta / ticket ----------
-  function closeAccount(clientId) {
+  function closeAccount(clientId, paidAmount) {
     const client = clients.find((c) => c.id === clientId)
     if (!client || client.order.length === 0) return
 
     const total = client.order.reduce((s, i) => s + i.qty * i.price, 0)
+    const hasPartial = typeof paidAmount === 'number' && !isNaN(paidAmount)
+    const paid = hasPartial ? Math.min(Math.max(paidAmount, 0), total) : total
+    const due = Math.max(total - paid, 0)
+
     const ticket = {
       id: genId(),
       clientId,
       clientName: client.name,
       items: client.order,
       total,
+      paid,
+      due,
       date: new Date().toISOString(),
     }
 
@@ -124,6 +130,10 @@ export default function App() {
 
   function deleteProduct(id) {
     setProducts((prev) => prev.filter((p) => p.id !== id))
+  }
+
+  function deleteTicket(ticketId) {
+    setTickets((prev) => prev.filter((t) => t.id !== ticketId))
   }
 
   const selectedClient = clients.find((c) => c.id === selectedClientId) || null
@@ -170,7 +180,11 @@ export default function App() {
       )}
 
       {ticketToShow && (
-        <TicketModal ticket={ticketToShow} onClose={() => setTicketToShow(null)} />
+        <TicketModal
+          ticket={ticketToShow}
+          onClose={() => setTicketToShow(null)}
+          onDelete={deleteTicket}
+        />
       )}
     </div>
   )
