@@ -1,0 +1,14 @@
+// Productos de ejemplo para el primer arranque.
+// El usuario puede editar, borrar o agregar más desde la pestaña "Productos".
+export const defaultProducts = [
+  { id: 'p1', name: 'Agua', price: 10, sales: 40 },
+  { id: 'p2', name: 'Cerveza', price: 23, sales: 96 },
+  { id: 'p3', name: 'Sport', price: 23, sales: 12 },
+  { id: 'p4', name: 'Gatorade', price: 25, sales: 12 },
+  { id: 'p5', name: 'Jugos Boin', price: 23, sales: 24 },
+  { id: 'p6', name: 'Ceros', price: 23, sales: 12 },
+  { id: 'p7', name: 'Cigarros', price: 8, sales: 48 },
+  { id: 'p8', name: 'Chicharrones', price: 20, sales: 20 },
+  { id: 'p9', name: 'Papas', price: 26, sales: 10 },
+  { id: 'p10', name: 'Clicles', price: 2, sales: 50 },
+]
