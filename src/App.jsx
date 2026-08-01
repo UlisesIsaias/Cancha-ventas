@@ -21,6 +21,7 @@ export default function App() {
 
   const [selectedClientId, setSelectedClientId] = useState(null)
   const [ticketToShow, setTicketToShow] = useState(null)
+  const [reportsTab, setReportsTab] = useState('hoy')
 
   useEffect(() => {
     document.documentElement.setAttribute('data-theme', theme)
@@ -81,14 +82,16 @@ export default function App() {
   }
 
   // ---------- Cerrar cuenta / ticket ----------
-  function closeAccount(clientId, paidAmount) {
+  function closeAccount(clientId, tenderedAmount) {
     const client = clients.find((c) => c.id === clientId)
     if (!client || client.order.length === 0) return
 
     const total = client.order.reduce((s, i) => s + i.qty * i.price, 0)
-    const hasPartial = typeof paidAmount === 'number' && !isNaN(paidAmount)
-    const paid = hasPartial ? Math.min(Math.max(paidAmount, 0), total) : total
-    const due = Math.max(total - paid, 0)
+    const hasTendered = typeof tenderedAmount === 'number' && !isNaN(tenderedAmount)
+    const tendered = hasTendered ? Math.max(tenderedAmount, 0) : total
+    const paid = Math.min(tendered, total)
+    const due = Math.max(total - tendered, 0)
+    const change = Math.max(tendered - total, 0)
 
     const ticket = {
       id: genId(),
@@ -96,18 +99,23 @@ export default function App() {
       clientName: client.name,
       items: client.order,
       total,
+      tendered,
       paid,
       due,
+      change,
       date: new Date().toISOString(),
     }
 
     setTickets((prev) => [ticket, ...prev])
 
-    // Actualiza contador de ventas por producto (para el orden "más vendidos")
+    // Actualiza contador de ventas y descuenta existencia por producto
     setProducts((prev) =>
       prev.map((p) => {
         const sold = client.order.find((i) => i.productId === p.id)
-        return sold ? { ...p, sales: p.sales + sold.qty } : p
+        if (!sold) return p
+        const newStock =
+          typeof p.stock === 'number' ? Math.max(0, p.stock - sold.qty) : p.stock
+        return { ...p, sales: p.sales + sold.qty, stock: newStock }
       })
     )
 
@@ -120,8 +128,8 @@ export default function App() {
   }
 
   // ---------- Productos ----------
-  function addProduct({ name, price }) {
-    setProducts((prev) => [...prev, { id: genId(), name, price, sales: 0 }])
+  function addProduct({ name, price, stock }) {
+    setProducts((prev) => [...prev, { id: genId(), name, price, sales: 0, stock }])
   }
 
   function updateProduct(id, changes) {
@@ -140,7 +148,17 @@ export default function App() {
 
   return (
     <div className="app-shell">
-      <Topbar view={view} setView={setView} theme={theme} onToggleTheme={toggleTheme} />
+      <Topbar
+        view={view}
+        setView={setView}
+        theme={theme}
+        onToggleTheme={toggleTheme}
+        tickets={tickets}
+        onOpenMonthly={() => {
+          setView('reportes')
+          setReportsTab('mes')
+        }}
+      />
 
       <main className="main-area">
         {view === 'clientes' && (
@@ -161,7 +179,12 @@ export default function App() {
         )}
 
         {view === 'reportes' && (
-          <Reports tickets={tickets} onSelectTicket={setTicketToShow} />
+          <Reports
+            tickets={tickets}
+            onSelectTicket={setTicketToShow}
+            tab={reportsTab}
+            setTab={setReportsTab}
+          />
         )}
       </main>
 

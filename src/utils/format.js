@@ -33,6 +33,21 @@ export function isToday(dateStr) {
   )
 }
 
+export function isThisMonth(dateStr) {
+  const d = new Date(dateStr)
+  const now = new Date()
+  return d.getFullYear() === now.getFullYear() && d.getMonth() === now.getMonth()
+}
+
+export function monthLabel(date = new Date()) {
+  const label = date.toLocaleDateString('es-MX', { month: 'long', year: 'numeric' })
+  return label.charAt(0).toUpperCase() + label.slice(1)
+}
+
+export function daysInMonth(date = new Date()) {
+  return new Date(date.getFullYear(), date.getMonth() + 1, 0).getDate()
+}
+
 export function initials(name) {
   return name
     .trim()

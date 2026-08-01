@@ -105,6 +105,19 @@ export default function TicketModal({ ticket, onClose, onDelete }) {
             <span>{formatMoney(ticket.total)}</span>
           </div>
 
+          {ticket.change > 0 && (
+            <>
+              <div className="ticket-item-row" style={{ marginTop: 10 }}>
+                <span>Recibió</span>
+                <span>{formatMoney(ticket.tendered)}</span>
+              </div>
+              <div className="ticket-item-row" style={{ color: 'var(--green)', fontWeight: 700 }}>
+                <span>Cambio</span>
+                <span>{formatMoney(ticket.change)}</span>
+              </div>
+            </>
+          )}
+
           {ticket.due > 0 && (
             <>
               <div className="ticket-item-row" style={{ marginTop: 10 }}>

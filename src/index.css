@@ -859,3 +859,176 @@ input:focus-visible,
     width: 100%;
   }
 }
+
+.ticket-total-row {
+  display: flex;
+  justify-content: space-between;
+  font-size: 17px;
+  font-weight: 700;
+  margin-top: 10px;
+}
+
+/* ---------- Bottom nav (mobile) ---------- */
+.bottom-nav {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  display: flex;
+  background: var(--bg-elevated);
+  border-top: 1px solid var(--border);
+  padding: 8px 12px calc(8px + env(safe-area-inset-bottom));
+  z-index: 20;
+}
+
+.bottom-nav button {
+  flex: 1;
+  border: none;
+  background: transparent;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 3px;
+  padding: 6px 0;
+  color: var(--text-faint);
+  font-size: 11px;
+  font-weight: 600;
+}
+
+.bottom-nav button .nav-icon {
+  font-size: 18px;
+}
+
+.bottom-nav button.active {
+  color: var(--blue);
+}
+
+@media (min-width: 720px) {
+  .bottom-nav {
+    display: none;
+  }
+  .nav-tabs {
+    display: flex;
+  }
+  .main-area {
+    padding-bottom: 40px;
+  }
+}
+
+/* ---------- Print ---------- */
+@media print {
+  body * {
+    visibility: hidden;
+  }
+  #printable-ticket,
+  #printable-ticket * {
+    visibility: visible;
+  }
+  #printable-ticket {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+  }
+}
+
+/* ---------- Report tabs (Hoy / Mes) ---------- */
+.tab-switch {
+  display: inline-flex;
+  gap: 4px;
+  background: var(--card);
+  border: 1px solid var(--border);
+  padding: 4px;
+  border-radius: var(--radius-md);
+  margin-bottom: 18px;
+}
+
+.tab-switch button {
+  border: none;
+  background: transparent;
+  color: var(--text-dim);
+  padding: 8px 20px;
+  border-radius: var(--radius-sm);
+  font-size: 14px;
+  font-weight: 600;
+  transition: all 0.15s ease;
+}
+
+.tab-switch button.active {
+  background: var(--blue);
+  color: #fff;
+}
+
+/* ---------- Change / due banner (CloseAccountModal) ---------- */
+.change-banner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border-radius: var(--radius-md);
+  padding: 16px 18px;
+  margin-top: 4px;
+  border: 1px solid var(--border);
+}
+
+.change-banner .change-label {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-dim);
+}
+
+.change-banner .change-amount {
+  font-family: var(--font-mono);
+  font-weight: 700;
+  font-size: 22px;
+}
+
+.change-positive {
+  background: var(--green-dim);
+  border-color: var(--green);
+}
+
+.change-positive .change-amount {
+  color: var(--green);
+}
+
+.change-negative {
+  background: var(--danger-dim);
+  border-color: var(--danger);
+}
+
+.change-negative .change-amount {
+  color: var(--danger);
+}
+
+.change-exact {
+  background: var(--blue-dim);
+  border-color: var(--blue);
+}
+
+.change-exact .change-amount {
+  color: var(--blue-strong);
+}
+
+/* ---------- Monthly chart card ---------- */
+.chart-card {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: 16px 12px 6px;
+}
+
+/* ---------- Stock tag on product buttons (order panel) ---------- */
+.product-btn {
+  position: relative;
+}
+
+.stock-tag {
+  font-size: 10px;
+  color: var(--text-faint);
+  font-family: var(--font-mono);
+}
+
+.stock-tag.stock-out {
+  color: var(--danger);
+  font-weight: 700;
+}

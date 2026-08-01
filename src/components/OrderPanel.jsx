@@ -1,5 +1,6 @@
 import { useMemo, useState } from 'react'
 import { formatMoney } from '../utils/format.js'
+import CloseAccountModal from './CloseAccountModal.jsx'
 
 export default function OrderPanel({
   client,
@@ -11,8 +12,7 @@ export default function OrderPanel({
   onDeleteClient,
 }) {
   const [confirmDelete, setConfirmDelete] = useState(false)
-  const [showPartial, setShowPartial] = useState(false)
-  const [paidInput, setPaidInput] = useState('')
+  const [showCloseModal, setShowCloseModal] = useState(false)
 
   const sortedProducts = useMemo(
     () => [...products].sort((a, b) => b.sales - a.sales),
@@ -20,17 +20,6 @@ export default function OrderPanel({
   )
 
   const total = client.order.reduce((s, i) => s + i.qty * i.price, 0)
-  const parsedPaid = parseFloat(paidInput)
-  const remaining =
-    !isNaN(parsedPaid) && parsedPaid > 0 ? Math.max(total - parsedPaid, 0) : null
-
-  function confirmPartial(e) {
-    e.preventDefault()
-    if (isNaN(parsedPaid) || parsedPaid <= 0) return
-    onCloseAccount(client.id, parsedPaid)
-    setShowPartial(false)
-    setPaidInput('')
-  }
 
   return (
     <div className="overlay" onClick={onClose}>
@@ -58,17 +47,25 @@ export default function OrderPanel({
           </p>
         ) : (
           <div className="product-grid">
-            {sortedProducts.map((p, idx) => (
-              <button
-                key={p.id}
-                className="product-btn"
-                onClick={() => onAddProduct(client.id, p.id)}
-              >
-                {idx === 0 && p.sales > 0 && <span className="top-badge">🔥</span>}
-                <span className="p-name">{p.name}</span>
-                <span className="p-price">{formatMoney(p.price)}</span>
-              </button>
-            ))}
+            {sortedProducts.map((p, idx) => {
+              const outOfStock = typeof p.stock === 'number' && p.stock <= 0
+              return (
+                <button
+                  key={p.id}
+                  className="product-btn"
+                  onClick={() => onAddProduct(client.id, p.id)}
+                >
+                  {idx === 0 && p.sales > 0 && <span className="top-badge">🔥</span>}
+                  <span className="p-name">{p.name}</span>
+                  <span className="p-price">{formatMoney(p.price)}</span>
+                  {outOfStock ? (
+                    <span className="stock-tag stock-out">Sin existencia</span>
+                  ) : typeof p.stock === 'number' ? (
+                    <span className="stock-tag">{p.stock} disp.</span>
+                  ) : null}
+                </button>
+              )
+            })}
           </div>
         )}
 
@@ -98,61 +95,15 @@ export default function OrderPanel({
           </>
         )}
 
-        {showPartial ? (
-          <form onSubmit={confirmPartial} style={{ marginTop: 22 }}>
-            <div className="field">
-              <label>¿Cuánto te dio? (debía {formatMoney(total)})</label>
-              <input
-                autoFocus
-                type="number"
-                min="0"
-                step="0.5"
-                placeholder="Ej. 125"
-                value={paidInput}
-                onChange={(e) => setPaidInput(e.target.value)}
-              />
-            </div>
-            {remaining !== null && (
-              <p style={{ fontSize: 13, color: 'var(--danger)', margin: '0 0 14px' }}>
-                {remaining > 0
-                  ? `Quedaría debiendo ${formatMoney(remaining)}`
-                  : 'Con eso queda pagado completo'}
-              </p>
-            )}
-            <div style={{ display: 'flex', gap: 10 }}>
-              <button
-                type="button"
-                className="btn btn-block"
-                onClick={() => {
-                  setShowPartial(false)
-                  setPaidInput('')
-                }}
-              >
-                Cancelar
-              </button>
-              <button type="submit" className="btn btn-success btn-block">
-                Listo, cerrar cuenta
-              </button>
-            </div>
-          </form>
-        ) : (
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 10, marginTop: 22 }}>
-            <button
-              className="btn btn-success btn-block btn-lg"
-              disabled={client.order.length === 0}
-              onClick={() => onCloseAccount(client.id)}
-            >
-              🧾 Pagó todo · cerrar cuenta
-            </button>
-            <button
-              className="btn btn-block"
-              disabled={client.order.length === 0}
-              onClick={() => setShowPartial(true)}
-            >
-              💸 Pagó solo una parte
-            </button>
-          </div>
-        )}
+        <div style={{ marginTop: 22 }}>
+          <button
+            className="btn btn-success btn-block btn-lg"
+            disabled={client.order.length === 0}
+            onClick={() => setShowCloseModal(true)}
+          >
+            🧾 Cerrar cuenta
+          </button>
+        </div>
 
         <div style={{ marginTop: 14, textAlign: 'center' }}>
           {!confirmDelete ? (
@@ -184,6 +135,17 @@ export default function OrderPanel({
           )}
         </div>
       </div>
+
+      {showCloseModal && (
+        <CloseAccountModal
+          total={total}
+          onCancel={() => setShowCloseModal(false)}
+          onConfirm={(tendered) => {
+            onCloseAccount(client.id, tendered)
+            setShowCloseModal(false)
+          }}
+        />
+      )}
     </div>
   )
 }
